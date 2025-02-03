@@ -21,20 +21,20 @@ jobs:
         with:
           node-version: 20
       - uses: browser-actions/setup-chrome@97349de5c98094d4fc9412f31c524d7697115ad8 #v1.5.0
-      #TODO: delete echo at end
       - name: Run release check
         run: |
           RELEASE_CHECK=$((echo y; sleep 0.5; echo $'\n';) | npm run release-check | sed -n '/Changes:/,/Are you sure you want to create these versions/p' | sed '1d;$d' | tr -d '\n' | tr -s ' ')
           echo "VERSION=$(echo $RELEASE_CHECK)" >> $GITHUB_ENV
           git stash
-      
-          echo "Release Check Output:"
-          echo "$RELEASE_CHECK"
       #TODO: update the details to the variables in other files
       - name: Configure Git user
         run: |
           git config --global user.email "90764648+MI6-255@users.noreply.github.com"
           git config --global user.name "mi6-255"
+      - name: Delete release branch
+        run: |
+          git fetch origin
+          git push origin --delete release || true
       #TODO: format commit properly AND remove the cat command
       - name: Create release branch
         run: |
