@@ -41,7 +41,7 @@ jobs:
           git fetch origin develop
           RELEASE_BRANCH="release"
           git checkout -b $RELEASE_BRANCH origin/develop
-          echo "$RELEASE_CHECK" > release.txt
+          echo "${{ env.VERSION }}" > release.txt
           cat release.txt 
           git add release.txt
           git commit -m "Update latest release updates"
