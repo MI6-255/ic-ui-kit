@@ -22,7 +22,7 @@ jobs:
       #TODO: delete echo at end
       - name: Run release check
         run: |
-          RELEASE_CHECK=$((echo y; sleep 0.5; echo $'\n';) | npm run release-check | tr -d '\n' | jq -Rs .)
+          RELEASE_CHECK=$((echo y; sleep 0.5; echo $'\n';) | npm run release-check | jq -Rs .)
           echo "VERSION<<EOF" >> $GITHUB_ENV
           echo "$RELEASE_CHECK" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
@@ -40,4 +40,4 @@ jobs:
         run: |
           curl -L -X POST -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" \
           "https://api.github.com/repos/mi6-255/ic-ui-kit/pulls" \
-          -d "{\"title\":\"Release Branch -> Develop\",\"body\":\"Update to npm version ${{ env.VERSION }}\",\"head\":\"release\",\"base\":\"develop\"}"
+          -d "$(jq -n --arg title 'Release Branch -> Develop' --arg body "Update to npm version ${{ env.VERSION }}" --arg head 'release' --arg base 'develop' '{title: $title, body: $body, head: $head, base: $base}')"
