@@ -7,10 +7,11 @@ on: workflow_dispatch
 # Then creates an env variable with the version changes to display as the body of the develop -> main PR
 jobs:
   ic-ui-kit-release:
-    name: "Release develop -> main"
+    name: "Release release -> develop"
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
+      contents: write
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
         with:
@@ -23,8 +24,13 @@ jobs:
       - name: Run release check
         run: |
           RELEASE_CHECK=$((echo y; sleep 0.5; echo $'\n';) | npm run release-check)
-          echo "VERSION=$(echo $RELEASE_CHECK | cut -c 223-293)" >> $GITHUB_ENV
+          echo "VERSION=$RELEASE_CHECK" >> $GITHUB_ENV
           git stash
-      - name: Create develop -> main PR
+      - name: Create release branch
         run: |
-          curl -L -X POST -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" "https://api.github.com/repos/mi6/ic-ui-kit/pulls" -d '{"title":"Develop -> Main","body":"Update to npm version ${{ env.VERSION }}","head":"develop","base":"main"}'
+          RELEASE_BRANCH="release"
+          git checkout -b $RELEASE_BRANCH
+          git push origin $RELEASE_BRANCH
+      - name: Create release branch -> develop PR
+        run: |
+          curl -L -X POST -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" "https://api.github.com/repos/mi6/ic-ui-kit/pulls" -d '{"title":"Release Branch -> Develop","body":"Update to npm version ${{ env.VERSION }}","head":"release","base":"develop"}'
