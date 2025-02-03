@@ -1,4 +1,4 @@
-name: Release
+name: Release new
 permissions: read-all
 
 on: workflow_dispatch
