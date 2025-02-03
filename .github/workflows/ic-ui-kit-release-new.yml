@@ -24,8 +24,10 @@ jobs:
       #TODO: delete echo at end
       - name: Run release check
         run: |
-          RELEASE_CHECK=$((echo y; sleep 0.5; echo $'\n';) | npm run release-check)
-          echo "VERSION=$(echo $RELEASE_CHECK | cut -c 223-293)" >> $GITHUB_ENV
+          RELEASE_CHECK=$((echo y; sleep 0.5; echo $'\n';) | npm run release-check | sed -n '/Changes:/,/Are you sure you want to create these versions/p' | sed '1d;$d' | tr -d '\n' | tr -s ' ')
+          echo "VERSION<<EOF" >> $GITHUB_ENV
+          echo "$RELEASE_CHECK" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
           git stash
       
           echo "Release Check Output:"
