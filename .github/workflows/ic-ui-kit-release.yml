@@ -21,8 +21,8 @@ jobs:
         with:
           node-version: 20
       - uses: browser-actions/setup-chrome@97349de5c98094d4fc9412f31c524d7697115ad8 #v1.5.0
-      - name: Run release check
       #TODO: delete echo at end
+      - name: Run release check
         run: |
           RELEASE_CHECK=$((echo y; sleep 0.5; echo $'\n';) | npm run release-check | tr -d '\n' | jq -Rs .)
           echo "VERSION<<EOF" >> $GITHUB_ENV
