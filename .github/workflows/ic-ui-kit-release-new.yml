@@ -48,4 +48,4 @@ jobs:
       - name: Create release branch -> develop PR
         #TODO: add back the url to main ui-kit no the folk  
         run: |
-          curl -L -X POST -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" "https://api.github.com/repos/mi6-255/ic-ui-kit/pulls" -d '{"title":"Release -> Develop","body":"Updates: ${{ env.VERSION }}","head":"release","base":"develop"}'
+          curl -L -X POST -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" "https://api.github.com/repos/mi6-255/ic-ui-kit/pulls" -d '{"title":"Release -> Develop","body":"Updates in the file changes.","head":"release","base":"develop"}'
