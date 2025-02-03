@@ -24,18 +24,21 @@ jobs:
       #TODO: delete echo at end
       - name: Run release check
         run: |
-          RELEASE_CHECK=$((echo y; sleep 0.5; echo $'\n';) | npm run release-check | sed -n '/Changes:/,/Are you sure you want to create these versions/p' | sed '1d;$d' | tr -d '\n' | tr -s ' ')
-          echo "VERSION<<EOF" >> $GITHUB_ENV
-          echo "$RELEASE_CHECK" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          RELEASE_CHECK=$((echo y; sleep 0.5; echo $'\n';) | npm run release-check)
+          echo "VERSION=$(echo $RELEASE_CHECK)" >> $GITHUB_ENV
           git stash
       
           echo "Release Check Output:"
           echo "$RELEASE_CHECK"
+      #TODO: format commit properly
       - name: Create release branch
         run: |
+          git fetch origin develop
           RELEASE_BRANCH="release"
-          git checkout -b $RELEASE_BRANCH
+          git checkout -b $RELEASE_BRANCH origin/develop
+          echo "$RELEASE_CHECK" > release.txt
+          git add release.txt
+          git commit -m "Update latest release updates"
           git push origin $RELEASE_BRANCH
       - name: Create release branch -> develop PR
         #TODO: add back the url to main ui-kit no the folk  
