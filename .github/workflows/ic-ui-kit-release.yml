@@ -1,4 +1,4 @@
-name: Release new
+name: Release
 permissions: read-all
 
 on: workflow_dispatch
@@ -22,7 +22,7 @@ jobs:
       #TODO: delete echo at end
       - name: Run release check
         run: |
-          RELEASE_CHECK=$((echo y; sleep 0.5; echo $'\n';) | npm run release-check | grep -E '@ukic/[^:]+: [0-9]+\.[0-9]+\.[0-9]+(-canary\.[0-9]+)? => [0-9]+\.[0-9]+\.[0-9]+(-canary\.[0-9]+)?')
+          RELEASE_CHECK=$((echo y; sleep 0.5; echo $'\n';) | npm run release-check | jq -Rs .)
           echo "VERSION<<EOF" >> $GITHUB_ENV
           echo "$RELEASE_CHECK" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
