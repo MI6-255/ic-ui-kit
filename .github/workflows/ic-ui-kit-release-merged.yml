@@ -6,6 +6,7 @@ on:
     types:
       - closed
 
+# TODO: Change all the "echos" in this entire file to the actual commands
 jobs:
   check-updates:
     if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'develop' && github.event.pull_request.head.ref == 'release'
@@ -140,6 +141,7 @@ jobs:
         id: core_cypress_performance_tests
         run: echo "npm run test-cypress-perf:ci"
 
+  # TODO: Remove the echo completion task and uncomment the rest
   ic-ui-kit-publish:
     needs:
       [
@@ -150,34 +152,35 @@ jobs:
     name: "Publish production packages"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
-        with:
-          fetch-depth: "0"
-          TOKEN: ${{ secrets.PUBLISH_PAT }}
-      - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
-      - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 #4.0.2
-        with:
-          node-version: 20
-          registry-url: "https://registry.npmjs.org"
+      - name: Echo completion for testing
+        run: echo "Publish production packages job is done"
+      # - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
+      #   with:
+      #     fetch-depth: "0"
+      #     TOKEN: ${{ secrets.PUBLISH_PAT }}
+      # - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+      # - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 #4.0.2
+      #   with:
+      #     node-version: 20
+      #     registry-url: "https://registry.npmjs.org"
 
-      - name: Install dependencies
-        run: |
-          npm ci
-          npm run bootstrap -- -- --ci
+      # - name: Install dependencies
+      #   run: |
+      #     npm ci
+      #     npm run bootstrap -- -- --ci
 
-      - name: Build
-        run: npm run build:all
+      # - name: Build
+      #   run: npm run build:all
         
-      # Runs git checkout for docs.json and canary-docs files to revert timestamp changes
-      # TODO: Change all the "echos" in this entire file to the actual commands
-      - name: Publish
-        run: |
-          git config --global user.name ${{ secrets.USERNAME }}
-          git config --global user.email ${{ secrets.EMAIL }}
-          git checkout packages/docs/docs.json packages/canary-docs/docs.json
-          echo "npx lerna publish --no-commit-hooks -y"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # # Runs git checkout for docs.json and canary-docs files to revert timestamp changes
+      # - name: Publish
+      #   run: |
+      #     git config --global user.name ${{ secrets.USERNAME }}
+      #     git config --global user.email ${{ secrets.EMAIL }}
+      #     git checkout packages/docs/docs.json packages/canary-docs/docs.json
+      #     echo "npx lerna publish --no-commit-hooks -y"
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   ic-ui-kit-deploy-storybook-canary:
     needs: [ic-ui-kit-publish, check-updates]
