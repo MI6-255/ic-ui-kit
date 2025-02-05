@@ -1,7 +1,10 @@
 name: Release Merged to Develop
 permissions: read-all
 
-on: workflow_dispatch
+on:
+  pull_request:
+    types:
+      - closed
 
 jobs:
   check-updates:
