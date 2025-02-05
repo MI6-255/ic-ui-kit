@@ -1,13 +1,15 @@
-name: Main
+name: Release Merged to Develop
 permissions: read-all
 
 on:
-  push:
-    branches:
-      - main
+  pull_request:
+    types:
+      - closed
 
+# TODO: Change all the "echos" in this entire file to the actual commands
 jobs:
   check-updates:
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'develop' && github.event.pull_request.head.ref == 'release'
     name: "Check package updates"
     runs-on: ubuntu-latest
     permissions:
@@ -40,45 +42,45 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm ci
-          npm run bootstrap -- -- --ci
+          echo "npm ci"
+          echo "npm run bootstrap -- -- --ci"
 
       - name: Build core components
         if: ${{ needs.check-updates.outputs.canary == 'false' }}
-        run: npm run build
+        run: echo "npm run build"
 
       - name: Build all components
         if: ${{ needs.check-updates.outputs.canary == 'true' }}
         run: |
-          npm run build:all
+          echo "npm run build:all"
 
       - name: Lint commit messages
         run: |
-          COMMIT_MESSAGE=$(git log -1 --pretty=format:"%s")
-          echo "$COMMIT_MESSAGE" | npx commitlint
+          echo "COMMIT_MESSAGE=$(git log -1 --pretty=format:"%s")"
+          echo "echo "$COMMIT_MESSAGE" | npx commitlint"
 
       - name: Lint
-        run: npm run lint
+        run: echo "npm run lint"
 
       - name: Prettier
-        run: npm run prettier
+        run: echo "npm run prettier"
 
       - name: Lint grammar
-        run: npm run lint:spelling
+        run: echo "npm run lint:spelling"
 
       - name: Audit
-        run: npm run audit:bypass-expiry
+        run: echo "npm run audit:bypass-expiry"
 
       - name: A11y core tests
         if: ${{ needs.check-updates.outputs.core == 'true' }}
-        run: npm run test-a11y:ci
+        run: echo "npm run test-a11y:ci"
 
       - name: A11y canary tests
         if: ${{ needs.check-updates.outputs.canary == 'true' }}
-        run: npm run test-a11y:ci:canary
+        run: echo "npm run test-a11y:ci:canary"
 
       - name: Unit Component tests
-        run: npm run test:coverage-ci
+        run: echo "npm run test:coverage-ci"
 
   ic-ui-kit-e2e-tests:
     needs: [check-updates]
@@ -92,21 +94,21 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm ci
-          npm run bootstrap -- -- --ci
+          echo "npm ci"
+          echo "npm run bootstrap -- -- --ci"
 
       - name: E2E core tests
         if: ${{ needs.check-updates.outputs.core == 'true' }}
         id: core_e2e_tests
-        run: npm run test-e2e
+        run: echo "npm run test-e2e"
 
       - name: Build core components
         if: ${{ steps.core_e2e_tests.outcome == 'skipped' && needs.check-updates.outputs.canary == 'true' }}
-        run: npm run build
+        run: echo "npm run build"
 
       - name: E2E canary tests
         if: ${{ needs.check-updates.outputs.canary == 'true' }}
-        run: npm run test-e2e:canary
+        run: echo "npm run test-e2e:canary"
 
   ic-ui-kit-cypress-tests:
     needs: [check-updates]
@@ -121,24 +123,25 @@ jobs:
       - name: Install dependencies
         run: |
           google-chrome --version
-          npm ci
-          npm run bootstrap -- -- --ci
+          echo "npm ci"
+          echo "npm run bootstrap -- -- --ci"
 
       - name: Core Cypress tests
         if: ${{ needs.check-updates.outputs.core == 'true' }}
         id: core_cypress_tests
-        run: npm run test-cypress:ci
+        run: echo "npm run test-cypress:ci"
 
       - name: Canary Cypress tests
         if: ${{ needs.check-updates.outputs.canary == 'true' }}
         id: canary_cypress_tests
-        run: npm run test-cypress:ci:canary
+        run: echo "npm run test-cypress:ci:canary"
 
       - name: Cypress performance tests
         if: ${{ needs.check-updates.outputs.core == 'true' }}
         id: core_cypress_performance_tests
-        run: npm run test-cypress-perf:ci
+        run: echo "npm run test-cypress-perf:ci"
 
+  # TODO: Remove the echo completion task and uncomment the rest
   ic-ui-kit-publish:
     needs:
       [
@@ -149,33 +152,35 @@ jobs:
     name: "Publish production packages"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
-        with:
-          fetch-depth: "0"
-          TOKEN: ${{ secrets.PUBLISH_PAT }}
-      - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
-      - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 #4.0.2
-        with:
-          node-version: 20
-          registry-url: "https://registry.npmjs.org"
+      - name: Echo completion for testing
+        run: echo "Publish production packages job is done"
+      # - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
+      #   with:
+      #     fetch-depth: "0"
+      #     TOKEN: ${{ secrets.PUBLISH_PAT }}
+      # - run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+      # - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 #4.0.2
+      #   with:
+      #     node-version: 20
+      #     registry-url: "https://registry.npmjs.org"
 
-      - name: Install dependencies
-        run: |
-          npm ci
-          npm run bootstrap -- -- --ci
+      # - name: Install dependencies
+      #   run: |
+      #     npm ci
+      #     npm run bootstrap -- -- --ci
 
-      - name: Build
-        run: npm run build:all
+      # - name: Build
+      #   run: npm run build:all
         
-      # Runs git checkout for docs.json and canary-docs files to revert timestamp changes
-      - name: Publish
-        run: |
-          git config --global user.name ${{ secrets.USERNAME }}
-          git config --global user.email ${{ secrets.EMAIL }}
-          git checkout packages/docs/docs.json packages/canary-docs/docs.json
-          npx lerna publish --no-commit-hooks -y
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # # Runs git checkout for docs.json and canary-docs files to revert timestamp changes
+      # - name: Publish
+      #   run: |
+      #     git config --global user.name ${{ secrets.USERNAME }}
+      #     git config --global user.email ${{ secrets.EMAIL }}
+      #     git checkout packages/docs/docs.json packages/canary-docs/docs.json
+      #     echo "npx lerna publish --no-commit-hooks -y"
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   ic-ui-kit-deploy-storybook-canary:
     needs: [ic-ui-kit-publish, check-updates]
@@ -226,3 +231,23 @@ jobs:
           repository: mi6/ic-design-system
           event-type: design-system-release
           client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
+
+  # TODO: Update URLs to mi6 from mi6-255
+  ic-ui-kit-develop-to-main:
+    needs: [ic-ui-kit-publish]
+    name: "Merge develop into main"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
+        with:
+          fetch-depth: 0
+
+      - name: Create PR to merge develop into main
+        run: |
+          curl -L -X POST -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" "https://api.github.com/repos/mi6-255/ic-ui-kit/pulls" -d '{"title":"Merge develop into main","body":"Ensure all changes are in main","head":"develop","base":"main"}'
+
+      - name: Ensure PR is merged
+        run: |
+          PR_NUMBER=$(curl -s -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" "https://api.github.com/repos/mi6-255/ic-ui-kit/pulls?state=open&head=develop" | jq -r '.[0].number')
+          curl -L -X PUT -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" "https://api.github.com/repos/mi6-255/ic-ui-kit/pulls/$PR_NUMBER/merge" -d '{"commit_title":"Merge develop into main","merge_method":"merge"}'
