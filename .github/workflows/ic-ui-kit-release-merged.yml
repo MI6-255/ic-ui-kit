@@ -1,13 +1,13 @@
-name: Main
+name: Release Merged to Develop
 permissions: read-all
 
 on:
-  push:
-    branches:
-      - main
+  pull_request:
+    types: [closed]
 
 jobs:
   check-updates:
+    if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'develop' && github.event.pull_request.head.ref == 'release'
     name: "Check package updates"
     runs-on: ubuntu-latest
     permissions:
@@ -168,12 +168,13 @@ jobs:
         run: npm run build:all
         
       # Runs git checkout for docs.json and canary-docs files to revert timestamp changes
+      # TODO: Change the echo to the actual command once happy
       - name: Publish
         run: |
           git config --global user.name ${{ secrets.USERNAME }}
           git config --global user.email ${{ secrets.EMAIL }}
           git checkout packages/docs/docs.json packages/canary-docs/docs.json
-          npx lerna publish --no-commit-hooks -y
+          echo "npx lerna publish --no-commit-hooks -y"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
