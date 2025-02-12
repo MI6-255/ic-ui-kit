@@ -29,6 +29,16 @@ jobs:
           echo "$RELEASE_CHECK" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
           git stash
+      - name: Extract and compare versions
+        run: |
+          REACT_VERSION=$(echo "${{ env.VERSION }}" | grep '@ukic/react' | sed -n 's/.*=> \([0-9.]*\).*/\1/p')
+          WEB_COMPONENTS_VERSION=$(echo "${{ env.VERSION }}" | grep '@ukic/web-components' | sed -n 's/.*=> \([0-9.]*\).*/\1/p')
+          echo "React version: $REACT_VERSION"
+          echo "Web Components version: $WEB_COMPONENTS_VERSION"
+          if [ "$REACT_VERSION" != "$WEB_COMPONENTS_VERSION" ]; then
+            echo "Error: The versions of @ukic/react and @ukic/web-components packages are not identical."
+            exit 1
+          fi
       #TODO: update the details to the variables in other files
       - name: Configure Git user
         run: |
