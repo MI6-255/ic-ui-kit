@@ -25,7 +25,9 @@ jobs:
         run: |
           RELEASE_CHECK=$((echo y; sleep 0.5; echo $'\n';) | npm run release-check)
           RELEASE_CHECK=$(echo "$RELEASE_CHECK" | sed 's/ - @/\n- @/g')
-          echo "VERSION=$(echo "$RELEASE_CHECK" | sed 's/"/\\"/g')" >> $GITHUB_ENV
+          echo "VERSION<<EOF" >> $GITHUB_ENV
+          echo "$RELEASE_CHECK" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
           git stash
       #TODO: update the details to the variables in other files
       - name: Configure Git user
